@@ -5,29 +5,37 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 const COUCHDB_URL = 'https://couchdb-3-gqmr.onrender.com/';
+const BACKEND_URL = 'https://smart-meter-be.onrender.com';
 
-async function pingCouchDB() {
+async function pingUrl(name, url) {
   try {
-    const response = await axios.get(COUCHDB_URL, {
+    const response = await axios.get(url, {
       timeout: 10000,
     });
 
     console.log(
-      `[${new Date().toISOString()}] Success: ${response.status}`
+      `[${new Date().toISOString()}] ${name} Success: ${response.status}`
     );
   } catch (error) {
     console.error(
-      `[${new Date().toISOString()}] Failed:`,
-      error.message
+      `[${new Date().toISOString()}] ${name} Failed: ${error.message}`
     );
   }
 }
 
 // Initial ping
-pingCouchDB();
+pingUrl('CouchDB', COUCHDB_URL);
+pingUrl('Backend', BACKEND_URL);
 
-// Ping every minute
-setInterval(pingCouchDB, 60 * 1000);
+// CouchDB every 1 minute
+setInterval(() => {
+  pingUrl('CouchDB', COUCHDB_URL);
+}, 60 * 1000);
+
+// Backend every 2 minutes
+setInterval(() => {
+  pingUrl('Backend', BACKEND_URL);
+}, 2 * 60 * 1000);
 
 app.get('/', (_, res) => {
   res.send('Keep Alive Service Running');
